@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tontine d'investissement KONDO — Simulateur et indice KONDO</title>
+<meta name="description" content="Simulez une tontine d'investissement et mesurez sa solidité avec l'indice KONDO.">
+<style>
+:root{--navy:#0f2038;--navy2:#1c3a63;--blue:#2457a6;--blue-soft:#eaf1fc;--gold:#c99a32;--gold-soft:#fbf3de;--bg:#f2f5fa;--card:#fff;--ink:#14243b;--muted:#5f6c82;--line:#e2e8f1;--green:#16784d;--green-soft:#e9f6ef;--amber:#b4640a;--amber-soft:#fff3e0;--red:#b42318;--red-soft:#fdecea;--r:18px;--shadow:0 1px 2px rgba(15,32,56,.05),0 10px 30px rgba(15,32,56,.07)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;-webkit-text-size-adjust:100%}
+.wrap{max-width:1220px;margin:0 auto;padding:0 18px}
+/* En-tête */
+.hero{background:radial-gradient(1200px 400px at 85% -20%,rgba(201,154,50,.28),transparent 60%),linear-gradient(120deg,#0e1d33,#1c3a63);color:#fff;padding:16px 0 26px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.18em;font-size:.8rem;color:#e9cf85}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#e6c46a,#b8862a);color:#1a1405;display:grid;place-items:center;font-weight:900;font-size:1.1rem;letter-spacing:0}
+h1{margin:8px 0 4px;font-size:clamp(1.6rem,3.6vw,2.3rem);line-height:1.1;letter-spacing:-.02em}
+h1 em{font-style:normal;color:#e9cf85}
+.lead{margin:0 0 10px;color:#d9e3f2;font-size:1.05rem;max-width:720px}
+.defn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:10px 14px;max-width:820px;color:#e8eefa;font-size:.95rem}
+.defn b{color:#e9cf85}
+.steps{list-style:none;display:flex;flex-wrap:wrap;gap:10px;padding:0;margin:16px 0 0}
+.steps li{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border-radius:100px;padding:7px 14px 7px 8px;font-size:.88rem}
+.steps b{width:24px;height:24px;border-radius:50%;background:#e9cf85;color:#1a1405;display:grid;place-items:center;font-size:.8rem}
+/* Mise en page */
+.layout{display:block;max-width:860px;margin-top:-12px;padding-bottom:50px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;margin-bottom:14px}
+.controls{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;scrollbar-width:thin}
+h2{font-size:1.15rem;margin:0 0 4px;letter-spacing:-.01em}
+h3{font-size:1rem;margin:16px 0 8px}
+.sec-h{display:flex;align-items:center;gap:10px;margin:0 0 4px}
+.sec-h .n{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:.8rem;font-weight:800;flex:none}
+.sec-sub{margin:0 0 6px;color:var(--muted);font-size:.86rem}
+.sep{height:1px;background:var(--line);margin:14px 0}
+/* Champs */
+.lab{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:11px 0 5px}
+label{font-size:.9rem;font-weight:700}
+.val{font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums;font-size:.92rem;text-align:right}
+.inp{position:relative}
+input[type=number]{width:100%;border:1.5px solid #cfd8e6;border-radius:12px;padding:12px 70px 12px 14px;font:inherit;font-weight:650;color:var(--ink);background:#fff;transition:border .15s,box-shadow .15s}
+.inp .suf{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:.8rem;color:var(--muted);font-weight:700;pointer-events:none}
+input:focus-visible,button:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid #cfe0fb;outline-offset:2px;border-color:var(--blue)}
+input[type=range]{width:100%;accent-color:var(--blue);height:28px;margin:0}
+.help{font-size:.78rem;color:var(--muted);margin-top:4px}
+.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 4px}
+.pre{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;font:inherit;color:var(--ink);transition:.15s}
+.pre b{display:block;font-size:.9rem}.pre small{display:block;color:var(--muted);font-size:.72rem;line-height:1.25;margin-top:2px}
+.pre:hover{border-color:#b9c8e0}.pre.on{border-color:var(--blue);background:var(--blue-soft)}
+details.adv{margin-top:12px;border:1px dashed #c8d3e4;border-radius:12px;padding:4px 14px 14px}
+details.adv summary{cursor:pointer;font-weight:750;font-size:.9rem;padding:10px 0;color:var(--blue)}
+.check{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;margin-top:7px;cursor:pointer;transition:.15s}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--green);flex:none}
+.check b{display:block;font-size:.88rem}.check small{display:block;color:var(--muted);font-size:.77rem;line-height:1.35}
+.check:has(input:checked){border-color:#9fd3b8;background:var(--green-soft)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.btn{border:0;border-radius:12px;padding:11px 15px;font:inherit;font-weight:750;font-size:.9rem;cursor:pointer;background:var(--navy);color:#fff;transition:.15s}
+.btn:hover{background:var(--navy2)}.btn.ghost{background:#eef2f8;color:var(--ink);border:1px solid var(--line)}.btn.ghost:hover{background:#e3e9f3}
+/* Indice */
+.idx-top{display:grid;grid-template-columns:minmax(210px,260px) 1fr;gap:22px;align-items:center}
+.gauge svg{width:100%;height:auto;display:block}
+.g-bg{fill:none;stroke:#e6ebf3;stroke-width:16;stroke-linecap:round}
+.g-val{fill:none;stroke-width:16;stroke-linecap:round;transition:stroke-dasharray .5s ease,stroke .3s}
+.g-num{font-size:46px;font-weight:850;fill:var(--ink);letter-spacing:-.03em}
+.g-sub{font-size:12px;fill:var(--muted);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:center;font-size:.72rem;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.eyebrow{font-size:.74rem;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:var(--muted)}
+.badge{display:inline-block;margin:8px 0 6px;padding:6px 14px;border-radius:100px;font-weight:800;font-size:1rem}
+#verdict{margin:4px 0;font-size:1rem}
+.capnote{margin:10px 0 0;background:var(--amber-soft);border-left:4px solid var(--amber);border-radius:8px;padding:10px 12px;font-size:.84rem;color:#6b3d06}
+.summary{margin:12px 0 0;padding:11px 14px;background:var(--blue-soft);border-radius:12px;font-size:.95rem}
+.warn{margin-top:10px;border-radius:10px;padding:10px 12px;font-size:.84rem;background:var(--red-soft);color:#7a1b12;border-left:4px solid var(--red)}
+.warn.info{background:var(--amber-soft);color:#6b3d06;border-color:var(--amber)}
+.crit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 22px}
+.cr-h{display:flex;justify-content:space-between;gap:8px;font-weight:750;font-size:.9rem}
+.pts{color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cr-q{font-size:.76rem;color:var(--muted);margin:1px 0 5px}
+.meter{height:9px;background:#e8edf4;border-radius:20px;overflow:hidden}.meter i{display:block;height:100%;border-radius:20px;transition:width .4s}
+.attn{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.attn li{display:flex;gap:12px;background:#fffaf0;border:1px solid #f2dfb5;border-radius:12px;padding:12px 14px}
+.attn .ico{flex:none;width:24px;height:24px;border-radius:50%;background:var(--amber);color:#fff;display:grid;place-items:center;font-weight:900;font-size:.85rem}
+.attn p{margin:2px 0 0;font-size:.85rem}.attn .adv{color:var(--green);font-weight:650}
+.okbox{background:var(--green-soft);border-radius:12px;padding:12px 14px;color:#0f5a3a;font-weight:650;font-size:.9rem}
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.kpi{border:1px solid var(--line);border-radius:14px;padding:15px;background:#fff;min-width:0}
+.kpi .label{font-size:.78rem;color:var(--muted);font-weight:650}
+.kpi .num{font-size:clamp(1.15rem,2.2vw,1.55rem);font-weight:850;letter-spacing:-.025em;margin:5px 0 3px;overflow-wrap:anywhere}
+.kpi .sub{font-size:.76rem;color:var(--muted)}
+.kpi.main{background:linear-gradient(160deg,#eef4ff,#e2edff);border-color:#cfe0fb}
+.good{color:var(--green)}.bad{color:var(--red)}
+/* Tables / graphique */
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:11px 8px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+tr.tot td{font-weight:800;background:#f6f8fc}
+tr.me td{background:var(--gold-soft)}
+.tw{overflow-x:auto}
+.chart svg{width:100%;height:auto;display:block;touch-action:pan-y}
+.grid{stroke:#e8edf4;stroke-width:1}.ax{font-size:11px;fill:#6b778c}
+.read{font-size:.84rem;color:var(--muted);min-height:2.6em;margin-top:6px}
+.lg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.78rem;color:var(--muted);margin:2px 0 8px}
+.lg i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.note{border-left:4px solid var(--gold);background:var(--gold-soft);padding:13px 15px;border-radius:8px;font-size:.85rem;color:#59451a}
+ul.plain{margin:8px 0 14px;padding-left:20px;font-size:.88rem;color:#2c3a52}
+details.m summary{cursor:pointer;font-weight:750;padding:4px 0}
+.prog{display:flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:100px;padding:5px;box-shadow:var(--shadow);margin-bottom:12px;position:relative;z-index:2}
+.prog button{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;border:0;background:transparent;border-radius:100px;padding:8px 6px;font:inherit;font-weight:700;font-size:.82rem;color:var(--muted);cursor:pointer}
+.prog b{width:22px;height:22px;border-radius:50%;background:#e8edf4;display:grid;place-items:center;font-size:.76rem;color:var(--muted)}
+.prog button.on{background:var(--navy);color:#fff}.prog button.on b{background:#e9cf85;color:#1a1405}
+.prog button.done b{background:var(--green);color:#fff}
+.step{display:none}.step.on{display:block}
+.step h2{font-size:1.3rem;margin-bottom:2px}
+.nav{display:flex;gap:10px;margin-top:18px}.nav .btn{flex:1;padding:13px 15px;font-size:.95rem}
+.btn.go{background:linear-gradient(135deg,#d9b04a,#b8862a);color:#1a1405}.btn.go:hover{filter:brightness(1.05);background:linear-gradient(135deg,#d9b04a,#b8862a)}
+.btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+.hint{font-size:.8rem;color:var(--amber);margin:10px 0 0;font-weight:650}
+.live{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--navy);color:#fff;border-radius:12px;padding:10px 14px;margin-top:16px;font-size:.84rem}.live b{color:#e9cf85}
+.resbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px}.resbar .sp{flex:1}.resbar .btn{padding:9px 13px;font-size:.84rem}
+.defn summary{cursor:pointer}.defn[open] summary{margin-bottom:6px}
+.tabs{display:flex;gap:6px;position:sticky;top:0;z-index:15;background:var(--bg);padding:8px 0 10px;margin-bottom:4px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1 0 auto;border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:100px;padding:9px 16px;font:inherit;font-weight:750;font-size:.88rem;cursor:pointer;white-space:nowrap;transition:.15s}
+.tab:hover{border-color:#b9c8e0}.tab[aria-selected=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.panel{display:none}.panel.on{display:block}
+footer{font-size:.8rem;color:var(--muted);padding:6px 0 30px}
+/* barre mobile */
+.mbar{display:none;position:fixed;left:10px;right:10px;bottom:10px;z-index:20;background:var(--navy);color:#fff;text-decoration:none;border-radius:16px;padding:12px 16px;box-shadow:0 8px 28px rgba(0,0,0,.28);font-size:.85rem;justify-content:space-between;gap:10px}
+.mbar b{color:#e9cf85}
+@media(max-width:960px){
+ .layout{grid-template-columns:1fr;margin-top:-14px}
+ .controls{position:static;max-height:none;overflow:visible}
+ .mbar{display:flex}
+ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){.prog span{display:none}.prog button.on span{display:inline}}
+@media(max-width:620px){
+ .idx-top{grid-template-columns:1fr}.gauge{max-width:260px;margin:0 auto}
+ .crit{grid-template-columns:1fr}.card{padding:17px}.kpis{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){.kpis{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{.prog,#wiz,.resbar{display:none}.tabs{display:none}.panel{display:block!important}
+ body{background:#fff}.hero{background:#fff;color:#111;padding:8px 0}.hero .lead,.defn{color:#222}.defn{background:#f4f4f4;border-color:#ccc}.steps,.controls,.mbar,.actions{display:none}
+ .layout{display:block;margin:0}.card{box-shadow:none;break-inside:avoid;border-color:#ccc}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<noscript><p style="padding:20px">Ce simulateur nécessite JavaScript pour fonctionner.</p></noscript>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brand"><span class="logo">K</span><span>KONDO</span></div>
+    <h1>Tontine d'investissement <em>KONDO</em></h1>
+    <p class="lead">Simulez votre tontine, comprenez où va l'argent et mesurez sa solidité grâce à l'<b>indice KONDO</b>.</p>
+    <details class="defn"><summary><b>C\'est quoi une tontine d\'investissement ?</b></summary> La tontine d'investissement est un mécanisme d'épargne collective dans lequel plusieurs personnes versent régulièrement des contributions financières afin de constituer un capital commun destiné à réaliser des investissements.</details>
+  </div>
+</header>
+
+<main class="wrap layout">
+  <!-- ========== PARAMÈTRES ========== -->
+  <nav class="prog" id="prog" aria-label="Progression">
+    <button type="button" data-s="1"><b>1</b><span>Tontine</span></button>
+    <button type="button" data-s="2"><b>2</b><span>Hypothèses</span></button>
+    <button type="button" data-s="3"><b>3</b><span>Sécurité</span></button>
+    <button type="button" data-s="4"><b>4</b><span>Résultats</span></button>
+  </nav>
+
+  <div class="card" id="wiz">
+    <section class="step on" data-s="1" aria-label="Étape 1 sur 3">
+      <h2>Décrivez votre tontine</h2>
+      <p class="sec-sub">Étape 1 sur 3 · Qui cotise, combien, et pendant combien de temps ?</p>
+      <div class="lab"><label for="members">Nombre de membres</label></div>
+    <div class="inp"><input id="members" type="number" inputmode="numeric" min="2" max="10000" step="1" value="20"><span class="suf">membres</span></div>
+
+    <div class="lab"><label for="contribution">Cotisation mensuelle par membre</label></div>
+    <div class="inp"><input id="contribution" type="number" inputmode="numeric" min="0" step="500" value="25000"><span class="suf">FCFA</span></div>
+    <div class="help" id="contribHelp"></div>
+
+    <div class="lab"><label for="months">Durée de la tontine</label><span class="val" id="monthsOut"></span></div>
+    <input id="months" type="range" min="6" max="120" step="6" value="24">
+      <p class="hint" id="hint1">Indiquez au moins 2 membres et une cotisation supérieure à 0 pour continuer.</p>
+      <div class="nav"><button type="button" class="btn go" id="next1" data-go="2">Suivant →</button></div>
+    </section>
+
+    <section class="step" data-s="2" aria-label="Étape 2 sur 3">
+      <h2>Choisissez vos hypothèses</h2>
+      <p class="sec-sub">Étape 2 sur 3 · Comment l'argent sera-t-il placé ? Un style suffit, les réglages détaillés sont facultatifs.</p>
+      <div class="presets" role="group" aria-label="Style d'hypothèses">
+      <button type="button" class="pre" data-p="prudent"><b>Prudent</b><small>Rendement 3 %<br>réserve forte</small></button>
+      <button type="button" class="pre" data-p="equilibre"><b>Équilibré</b><small>Rendement 5 %<br>réserve moyenne</small></button>
+      <button type="button" class="pre" data-p="dynamique"><b>Dynamique</b><small>Rendement 10 %<br>plus risqué</small></button>
+    </div>
+
+    <details class="adv">
+      <summary>Régler les hypothèses en détail</summary>
+      <div class="lab"><label for="annualReturn">Rendement annuel supposé</label><span class="val" id="returnOut"></span></div>
+      <input id="annualReturn" type="range" min="-20" max="15" step="0.5" value="5">
+      <div class="help">Un scénario, jamais une promesse. Une valeur négative est possible.</div>
+
+      <div class="lab"><label for="fee">Frais de gestion des placements (par an)</label><span class="val" id="feeOut"></span></div>
+      <input id="fee" type="range" min="0" max="5" step="0.25" value="1.5">
+
+      <div class="lab"><label for="reserve">Réserve de sécurité</label><span class="val" id="reserveOut"></span></div>
+      <input id="reserve" type="range" min="0" max="30" step="1" value="10">
+      <div class="help">Part des cotisations gardée en liquide, non investie, pour faire face aux imprévus.</div>
+
+      <div class="lab"><label for="defaultRate">Cotisations non payées (impayés)</label><span class="val" id="defaultOut"></span></div>
+      <input id="defaultRate" type="range" min="0" max="30" step="1" value="3">
+      <div class="help">Part des cotisations prévues qui ne rentrera jamais.</div>
+
+      <div class="lab"><label for="setup">Frais fixes de départ</label></div>
+      <div class="inp"><input id="setup" type="number" inputmode="numeric" min="0" step="1000" value="15000"><span class="suf">FCFA</span></div>
+
+      <div class="lab"><label for="monthlyCost">Frais de fonctionnement mensuels</label></div>
+      <div class="inp"><input id="monthlyCost" type="number" inputmode="numeric" min="0" step="1000" value="5000"><span class="suf">FCFA</span></div>
+
+      <div class="lab"><label for="income">Revenu mensuel moyen d'un membre</label></div>
+      <div class="inp"><input id="income" type="number" inputmode="numeric" min="0" step="10000" value="200000"><span class="suf">FCFA</span></div>
+      <div class="help">Sert à vérifier que la cotisation reste supportable. Mettez 0 pour ignorer ce critère.</div>
+    </details>
+      <div class="nav"><button type="button" class="btn ghost" data-go="1">← Retour</button><button type="button" class="btn go" data-go="3">Suivant →</button></div>
+    </section>
+
+    <section class="step" data-s="3" aria-label="Étape 3 sur 3">
+      <h2>Sécurisez la tontine</h2>
+      <p class="sec-sub">Étape 3 sur 3 · Cochez uniquement ce qui est réellement en place : c'est ce qui protège l'argent des membres.</p>
+      <label class="check"><input type="checkbox" id="gSeparate"><span><b>Compte séparé ou dépositaire tiers</b><small>L'argent de la tontine n'est jamais mélangé avec l'argent d'une personne.</small></span></label>
+    <label class="check"><input type="checkbox" id="gLegal"><span><b>Cadre réglementaire validé</b><small>Montage validé par un juriste et le régulateur, ou société de gestion agréée.</small></span></label>
+    <label class="check"><input type="checkbox" id="gRules"><span><b>Règlement intérieur signé</b><small>Cotisations, retards, sortie d'un membre et litiges sont écrits et acceptés.</small></span></label>
+    <label class="check"><input type="checkbox" id="gReport"><span><b>Compte rendu régulier aux membres</b><small>Chaque trimestre : solde, frais et placements sont communiqués.</small></span></label>
+      <div class="nav"><button type="button" class="btn ghost" data-go="2">← Retour</button><button type="button" class="btn go" data-go="4">Voir l'indice KONDO →</button></div>
+    </section>
+
+    <div class="live" aria-live="polite"><span>Aperçu · indice KONDO <b id="mbIdx">–</b></span><span>Valeur finale <b id="mbVal">–</b></span></div>
+  </div>
+
+  <!-- ========== RÉSULTATS ========== -->
+  <section id="resultats" aria-label="Résultats" hidden>
+    <div class="resbar">
+      <button class="btn ghost" id="edit" type="button" data-go="1">← Modifier mes réponses</button>
+      <span class="sp"></span>
+      <button class="btn ghost" id="copy" type="button">Copier le résumé</button>
+      <button class="btn ghost" id="print" type="button">Imprimer / PDF</button>
+      <button class="btn ghost" id="reset" type="button">Tout remettre à zéro</button>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Sections des résultats">
+      <button class="tab" role="tab" data-t="p1" aria-selected="true" type="button">Indice KONDO</button>
+      <button class="tab" role="tab" data-t="p2" aria-selected="false" type="button">Chiffres et graphique</button>
+      <button class="tab" role="tab" data-t="p3" aria-selected="false" type="button">Détail et scénarios</button>
+      <button class="tab" role="tab" data-t="p4" aria-selected="false" type="button">Méthode et limites</button>
+    </div>
+    <div class="panel on" id="p1">
+    <div class="card">
+      <div class="idx-top">
+        <div>
+          <div class="gauge">
+            <svg viewBox="0 0 220 130" role="img" aria-label="Jauge de l'indice KONDO">
+              <path class="g-bg" d="M 20 110 A 90 90 0 0 1 200 110"/>
+              <path class="g-val" id="gArc" d="M 20 110 A 90 90 0 0 1 200 110" stroke="#b42318"/>
+              <text id="gNum" x="110" y="96" text-anchor="middle" class="g-num">–</text>
+              <text x="110" y="118" text-anchor="middle" class="g-sub">sur 100</text>
+            </svg>
+          </div>
+          <div class="legend"><span><i style="background:#b42318"></i>Fragile</span><span><i style="background:#c47a0c"></i>À renforcer</span><span><i style="background:#16784d"></i>Solide</span><span><i style="background:#0a5c3e"></i>Très solide</span></div>
+        </div>
+        <div>
+          <div class="eyebrow">Indice KONDO · viabilité de la tontine</div>
+          <span id="lvl" class="badge">–</span>
+          <p id="verdict"></p>
+          <p id="capNote" class="capnote" hidden></p>
+        </div>
+      </div>
+      <p class="summary" id="summary" aria-live="polite"></p>
+      <div id="warns"></div>
+
+      <h3>Les 8 critères de l'indice</h3>
+      <div class="crit" id="crit"></div>
+
+      <h3>Points d'attention et conseils</h3>
+      <div id="attn"></div>
+    </div>
+
+    </div>
+    <div class="panel" id="p2">
+    <div class="card">
+      <h2>Résultats en chiffres</h2>
+      <p class="sec-sub">Dans le scénario que vous avez choisi.</p>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Cotisations encaissées</div><div class="num" id="kReceived">–</div><div class="sub" id="kReceivedSub"></div></div>
+        <div class="kpi main"><div class="label">Valeur finale estimée</div><div class="num" id="kFinal">–</div><div class="sub">Après frais, avant impôts</div></div>
+        <div class="kpi"><div class="label">Gain ou perte net</div><div class="num" id="kGain">–</div><div class="sub" id="kGainSub"></div></div>
+        <div class="kpi"><div class="label">Rendement net annualisé</div><div class="num" id="kIrr">–</div><div class="sub">Après frais et impayés (estimation)</div></div>
+        <div class="kpi"><div class="label">Valeur moyenne par membre</div><div class="num" id="kPer">–</div><div class="sub" id="kPerSub"></div></div>
+        <div class="kpi"><div class="label">Frais totaux</div><div class="num" id="kFees">–</div><div class="sub" id="kFeesSub"></div></div>
+      </div>
+    </div>
+
+    <div class="card chart">
+      <h2>Évolution du capital</h2>
+      <p class="sec-sub">Mois après mois, comparée à ce que les membres ont versé.</p>
+      <div class="lg"><span><i style="background:#8a96ab"></i>Cotisations encaissées</span><span><i style="background:#2457a6"></i>Votre scénario</span><span><i style="background:#c47a0c"></i>Scénario prudent (−5 %/an)</span></div>
+      <div id="chart"></div>
+      <div class="read" id="chartRead"></div>
+    </div>
+
+    </div>
+    <div class="panel" id="p3">
+    <div class="card">
+      <h2>Où va l'argent ?</h2>
+      <p class="sec-sub">Des cotisations prévues jusqu'à la valeur finale.</p>
+      <div class="tw"><table><tbody id="flow"></tbody></table></div>
+      <p class="help" id="flowNote"></p>
+    </div>
+
+    <div class="card">
+      <h2>Et si les marchés évoluent autrement ?</h2>
+      <p class="sec-sub">Mêmes cotisations et mêmes frais, rendements différents.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Scénario</th><th>Rendement/an</th><th>Valeur finale</th><th>Gain / perte</th><th>% des cotisations</th></tr></thead>
+        <tbody id="scen"></tbody>
+      </table></div>
+      <p class="help">Les scénarios ne sont pas des promesses. Les résultats peuvent être inférieurs aux sommes versées.</p>
+    </div>
+
+    </div>
+    <div class="panel" id="p4">
+    <div class="card">
+      <h2>Comment est calculé l'indice KONDO ?</h2>
+      <p class="sec-sub">Un score de 0 à 100 qui combine 8 critères, avec des poids affichés ci-dessous.</p>
+      <details class="m">
+        <summary>Voir la méthode</summary>
+        <div class="tw"><table>
+          <thead><tr><th>Critère</th><th>Poids</th><th>Ce qui est mesuré</th></tr></thead>
+          <tbody>
+            <tr><td>Résistance du capital</td><td>25</td><td style="text-align:left">Capital restant en fin de période, dans votre scénario et dans un scénario prudent (−5 %/an)</td></tr>
+            <tr><td>Poids des frais</td><td>15</td><td style="text-align:left">Frais totaux rapportés aux cotisations (idéal : moins de 3 %)</td></tr>
+            <tr><td>Liquidité et impayés</td><td>15</td><td style="text-align:left">Réserve de sécurité comparée au niveau d'impayés attendu</td></tr>
+            <tr><td>Gouvernance</td><td>15</td><td style="text-align:left">Compte séparé, cadre réglementaire, règlement, transparence</td></tr>
+            <tr><td>Effort de cotisation</td><td>10</td><td style="text-align:left">Cotisation rapportée au revenu moyen (idéal : moins de 5 %)</td></tr>
+            <tr><td>Mutualisation</td><td>10</td><td style="text-align:left">Nombre de membres : plus il y en a, mieux le risque est partagé</td></tr>
+            <tr><td>Horizon</td><td>5</td><td style="text-align:left">Durée : au moins 3 ans pour investir sereinement</td></tr>
+            <tr><td>Réalisme des hypothèses</td><td>5</td><td style="text-align:left">Rendement supposé : au-delà de 6 %/an, la note baisse</td></tr>
+          </tbody>
+        </table></div>
+        <ul class="plain">
+          <li>Si le revenu moyen est à 0, le critère « effort » est ignoré et les autres poids sont ajustés.</li>
+          <li>Plafonds de sécurité : sans compte séparé <u>et</u> sans cadre réglementaire validé, l'indice ne peut pas dépasser 59. S'il en manque un seul, il ne peut pas dépasser 69.</li>
+          <li>Niveaux : 0–39 Fragile · 40–59 À renforcer · 60–79 Solide · 80–100 Très solide.</li>
+          <li>Les seuils sont des repères pédagogiques choisis par KONDO. Ils ne constituent ni une notation financière ni un avis réglementaire.</li>
+        </ul>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>Hypothèses et garde-fous</h2>
+      <ul class="plain">
+        <li>Les cotisations sont versées en fin de mois, de façon régulière.</li>
+        <li>Les impayés sont répartis uniformément sur toute la durée.</li>
+        <li>La réserve de sécurité n'est pas investie et ne rapporte rien (hypothèse prudente).</li>
+        <li>Les frais de gestion sont prélevés chaque mois sur le capital investi. Les frais fixes de départ sont payés le premier mois.</li>
+        <li>Pas de retrait anticipé, pas de sortie de membre, pas de fiscalité, pas de pénalités.</li>
+        <li>La valeur moyenne par membre suppose un partage égal du capital final.</li>
+      </ul>
+      <div class="note"><strong>Important : cadre juridique.</strong> Cet outil est un simulateur pédagogique, ce n'est ni un fonds d'investissement ni une autorisation de collecter l'épargne. La collecte, la gestion collective et la commercialisation de parts peuvent relever de règles spécifiques au Togo et à l'UMOA. Avant tout lancement réel, faites valider le montage par un juriste et par l'autorité de régulation compétente (AMF-UMOA), et envisagez un partenariat avec une société de gestion agréée. Ne promettez jamais de rendement garanti.</div>
+    </div>
+    </div>
+    <footer>Tontine d'investissement KONDO · Version 2.0 · Calculs indicatifs, à vérifier avant toute décision financière.</footer>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const NUM_IDS = ['members','contribution','months','annualReturn','fee','reserve','defaultRate','setup','monthlyCost','income'];
+const CHK_IDS = ['gSeparate','gLegal','gRules','gReport'];
+const DEFAULTS = {members:20,contribution:25000,months:24,annualReturn:5,fee:1.5,reserve:10,defaultRate:3,setup:15000,monthlyCost:5000,income:200000};
+const PRESETS = {
+  prudent:{annualReturn:3,fee:1.5,reserve:15,defaultRate:5},
+  equilibre:{annualReturn:5,fee:1.5,reserve:10,defaultRate:3},
+  dynamique:{annualReturn:10,fee:2,reserve:5,defaultRate:3}
+};
+const NB = '\u00a0';
+const nf = new Intl.NumberFormat('fr-FR');
+const clamp = (x,a,b) => Math.min(b,Math.max(a,x));
+const num = (id,d=0) => { const v = parseFloat($(id).value); return Number.isFinite(v) ? v : d; };
+const fmt = n => nf.format(Math.round(n)).replace(/\u202f/g,NB) + NB + 'FCFA';
+const fmtS = n => (n>=0?'+':'−') + fmt(Math.abs(n));
+const pf = x => x.toLocaleString('fr-FR',{maximumFractionDigits:1}) + NB + '%';
+const short = n => {
+  const a = Math.abs(n);
+  if(a>=1e9) return (n/1e9).toFixed(1).replace('.',',')+' Md';
+  if(a>=1e6) return (n/1e6).toFixed(1).replace('.',',')+' M';
+  if(a>=1e3) return Math.round(n/1e3)+' k';
+  return Math.round(n)+'';
+};
+const monthsLabel = m => {
+  if(m<12) return m+' mois';
+  const y = m/12;
+  return m+' mois ('+(y===1?'1 an':y.toLocaleString('fr-FR',{maximumFractionDigits:1})+' ans')+')';
+};
+
+function read(){
+  const raw = {members:num('members',20), months:num('months',24), contribution:num('contribution',0)};
+  return {
+    raw,
+    members: Math.round(clamp(raw.members,2,10000)),
+    contribution: clamp(raw.contribution,0,1e9),
+    months: clamp(raw.months,6,120),
+    r: num('annualReturn')/100,
+    fee: clamp(num('fee')/100,0,0.2),
+    reserve: clamp(num('reserve')/100,0,1),
+    def: clamp(num('defaultRate')/100,0,1),
+    setup: Math.max(0,num('setup')),
+    ops: Math.max(0,num('monthlyCost')),
+    income: Math.max(0,num('income')),
+    g: {separate:$('gSeparate').checked, legal:$('gLegal').checked, rules:$('gRules').checked, report:$('gReport').checked}
+  };
+}
+
+/* Simulation mensuelle de la tontine */
+function simulate(p, ret){
+  const expected = p.members*p.contribution;
+  const received = expected*(1-p.def);
+  const resM = received*p.reserve;
+  const netFlow = received - resM - p.ops;
+  const rm = Math.pow(1+ret,1/12)-1;
+  let inv=0, growth=0, fees=0;
+  const val=[0], cum=[0];
+  for(let m=1;m<=p.months;m++){
+    const pos = Math.max(0,inv);
+    const g = pos*rm; growth += g;
+    const f = Math.max(0,pos+g)*p.fee/12; fees += f;
+    inv = inv + g - f + netFlow;
+    if(m===1) inv -= p.setup;
+    val.push(Math.max(0,inv) + resM*m);
+    cum.push(received*m);
+  }
+  const totalExpected = expected*p.months;
+  const totalReceived = received*p.months;
+  const resTotal = resM*p.months;
+  const opsTotal = p.ops*p.months;
+  const final = Math.max(0,inv) + resTotal;
+  return {expected,received,resM,netFlow,totalExpected,totalReceived,resTotal,opsTotal,growth,fees,final,
+    gain:final-totalReceived, totalFees:p.setup+opsTotal+fees, shortfall:inv<0, val, cum};
+}
+
+/* Rendement annualisé (taux interne) */
+function irr(c,F,M){
+  if(c<=0) return null;
+  const f = i => { let s=0; for(let m=1;m<=M;m++) s+=c/Math.pow(1+i,m); return F/Math.pow(1+i,M)-s; };
+  let lo=-0.2, hi=0.2, flo=f(lo), fhi=f(hi);
+  if(flo*fhi>0) return null;
+  for(let k=0;k<80;k++){ const mid=(lo+hi)/2, fm=f(mid); if(flo*fm<=0){hi=mid;fhi=fm}else{lo=mid;flo=fm} }
+  return Math.pow(1+(lo+hi)/2,12)-1;
+}
+
+/* Indice KONDO */
+function level(i){
+  if(i<40) return {name:'Fragile',color:'#b42318',soft:'#fdecea',verdict:"Structure fragile : le risque de perte ou de blocage est élevé. À ne pas lancer en l'état."};
+  if(i<60) return {name:'À renforcer',color:'#c47a0c',soft:'#fff3e0',verdict:"Base intéressante, mais des points importants doivent être corrigés avant de collecter l'argent des membres."};
+  if(i<80) return {name:'Solide',color:'#16784d',soft:'#e9f6ef',verdict:"Structure solide. Quelques améliorations peuvent encore sécuriser le projet."};
+  return {name:'Très solide',color:'#0a5c3e',soft:'#dcf3e7',verdict:"Structure très solide selon les critères KONDO. Restez prudent : aucun résultat n'est garanti."};
+}
+
+function kondo(p, sim, pru){
+  const R  = sim.totalReceived>0 ? sim.final/sim.totalReceived : 0;
+  const Rp = pru.totalReceived>0 ? pru.final/pru.totalReceived : 0;
+  const F  = sim.totalReceived>0 ? sim.totalFees/sim.totalReceived : 1;
+  const needed = Math.max(0.05, 0.03+1.5*p.def);
+  const c = [];
+  c.push({key:'res',name:'Résistance du capital',q:"Le capital est-il préservé si les marchés baissent ?",w:25,
+    s:0.5*clamp((R-0.95)/0.10,0,1)+0.5*clamp((Rp-0.90)/0.10,0,1),
+    info:`Si les placements perdent 5${NB}% par an, il resterait ${pf(Rp*100)} des cotisations encaissées (${pf(R*100)} dans votre scénario).`,
+    tip:"Choisir des placements moins risqués, allonger la durée ou réduire les frais."});
+  c.push({key:'fees',name:'Poids des frais',q:"Les frais grignotent-ils l'épargne ?",w:15,
+    s:clamp(1-(F-0.03)/0.12,0,1),
+    info:`Les frais totaux représentent ${pf(F*100)} des cotisations.`,
+    tip:"Négocier les frais de gestion et limiter les frais fixes et mensuels."});
+  c.push({key:'liq',name:'Liquidité et impayés',q:"La tontine peut-elle absorber les retards de paiement ?",w:15,
+    s:0.5*clamp(p.reserve/needed,0,1)+0.5*(1-clamp(p.def/0.20,0,1)),
+    info:`Réserve de ${pf(p.reserve*100)} pour ${pf(p.def*100)} d'impayés attendus (réserve conseillée : au moins ${pf(needed*100)}).`,
+    tip:"Augmenter la réserve, demander une caution ou prévoir des pénalités de retard."});
+  const miss = [];
+  if(!p.g.separate) miss.push('compte séparé');
+  if(!p.g.legal) miss.push('cadre réglementaire validé');
+  if(!p.g.rules) miss.push('règlement intérieur');
+  if(!p.g.report) miss.push('compte rendu régulier');
+  c.push({key:'gov',name:'Gouvernance',q:"L'argent est-il protégé et les règles claires ?",w:15,
+    s:(4-miss.length)/4,
+    info: miss.length ? `Garanties manquantes : ${miss.join(', ')}.` : "Toutes les garanties sont en place.",
+    tip:"Mettre ces garanties en place avant toute collecte d'argent."});
+  const e = p.income>0 ? p.contribution/p.income : null;
+  c.push({key:'eff',name:'Effort de cotisation',q:"La cotisation est-elle supportable pour un membre ?",w:10,
+    s: e===null ? null : 1-clamp((e-0.05)/0.20,0,1),
+    info: e===null ? '' : `La cotisation représente ${pf(e*100)} du revenu moyen d'un membre.`,
+    tip:"Au-delà de 10 à 15 % du revenu, les retards augmentent : proposer une cotisation plus légère."});
+  c.push({key:'size',name:'Mutualisation',q:"Le risque est-il bien réparti entre les membres ?",w:10,
+    s:clamp((p.members-5)/25,0,1),
+    info:`Avec ${p.members} membres, un seul défaut pèse ${pf(100/p.members)} des cotisations.`,
+    tip:"Viser au moins 25 à 30 membres pour mieux partager le risque."});
+  c.push({key:'hor',name:'Horizon',q:"Le temps est-il suffisant pour investir ?",w:5,
+    s:clamp((p.months-6)/30,0,1),
+    info:`Durée de ${monthsLabel(p.months)} : court pour absorber les variations des placements.`,
+    tip:"Prévoir 3 ans ou plus pour un projet d'investissement."});
+  c.push({key:'real',name:'Réalisme des hypothèses',q:"Le rendement espéré est-il raisonnable ?",w:5,
+    s:p.r<=0.06 ? 1 : 1-clamp((p.r-0.06)/0.09,0,1),
+    info:`Rendement supposé de ${pf(p.r*100)} par an : ambitieux et rarement garanti.`,
+    tip:"Retenir une hypothèse prudente (3 à 6 %) et regarder le scénario négatif."});
+  let sw=0, ss=0;
+  c.forEach(x=>{ if(x.s!==null){ sw+=x.w; ss+=x.w*x.s; } });
+  const raw = sw>0 ? ss/sw*100 : 0;
+  const missCrit = [];
+  if(!p.g.separate) missCrit.push('compte séparé');
+  if(!p.g.legal) missCrit.push('cadre réglementaire validé');
+  const cap = missCrit.length===2 ? 59 : missCrit.length===1 ? 69 : 100;
+  const index = Math.round(Math.min(raw,cap));
+  return {crit:c, raw, cap, capped:raw>cap && cap<100, missCrit, index, R, Rp, F};
+}
+
+/* Rendu */
+let last = null;
+function render(){
+  const p = read();
+  $('monthsOut').textContent = monthsLabel(p.months);
+  $('returnOut').textContent = pf(p.r*100);
+  $('feeOut').textContent = pf(p.fee*100);
+  $('reserveOut').textContent = pf(p.reserve*100);
+  $('defaultOut').textContent = pf(p.def*100);
+  $('contribHelp').textContent = 'Soit ' + fmt(p.members*p.contribution) + ' par mois pour tout le groupe.';
+  document.querySelectorAll('.pre').forEach(b=>{
+    const pr = PRESETS[b.dataset.p];
+    const on = Math.abs(pr.annualReturn-p.r*100)<1e-9 && Math.abs(pr.fee-p.fee*100)<1e-9 && Math.abs(pr.reserve-p.reserve*100)<1e-9 && Math.abs(pr.defaultRate-p.def*100)<1e-9;
+    b.classList.toggle('on',on); b.setAttribute('aria-pressed',on);
+  });
+
+  const sim = simulate(p,p.r), pru = simulate(p,-0.05);
+  const k = kondo(p,sim,pru);
+  const lv = level(k.index);
+  const irrV = irr(sim.received, sim.final, p.months);
+
+  // Jauge
+  const L = Math.PI*90;
+  const arc = $('gArc');
+  arc.style.strokeDasharray = (k.index/100*L)+' '+L;
+  arc.style.stroke = lv.color;
+  $('gNum').textContent = k.index;
+  const lvl = $('lvl'); lvl.textContent = lv.name; lvl.style.background = lv.soft; lvl.style.color = lv.color;
+  $('verdict').textContent = lv.verdict;
+  const cn = $('capNote');
+  if(k.capped){
+    cn.hidden = false;
+    cn.textContent = `Indice plafonné à ${k.cap} : il manque ${k.missCrit.join(' et ')}. Sans ce plafond, le score calculé serait de ${Math.round(k.raw)}.`;
+  } else cn.hidden = true;
+  $('mbIdx').textContent = k.index+' · '+lv.name;
+  $('mbVal').textContent = short(sim.final)+' FCFA';
+
+  // Résumé
+  const gainTxt = sim.gain>=0 ? 'un gain' : 'une perte';
+  $('summary').innerHTML = `<b>En résumé :</b> ${p.members} membres cotisent ${fmt(p.contribution)} par mois pendant ${monthsLabel(p.months)}. Le groupe devait verser ${fmt(sim.totalExpected)}, dont environ ${fmt(sim.totalReceived)} réellement encaissés après impayés. Dans votre scénario, le capital final estimé est de <b>${fmt(sim.final)}</b>, soit ${gainTxt} de ${fmt(Math.abs(sim.gain))} après tous les frais.`;
+
+  // Alertes
+  const w = [];
+  if(p.raw.members>0 && (p.raw.members<2 || p.raw.members>10000)) w.push(['Le nombre de membres doit être compris entre 2 et 10 000 : la valeur a été ajustée.']);
+  if(p.raw.contribution<=0) w.push(['Indiquez une cotisation supérieure à 0 pour obtenir des résultats utiles.']);
+  if(sim.shortfall) w.push(['Les frais dépassent les cotisations encaissées : le capital investi serait épuisé. Réduisez les frais ou augmentez les cotisations.']);
+  else if(sim.netFlow<=0 && p.contribution>0) w.push(['Après réserve et frais mensuels, il ne reste rien à investir chaque mois.']);
+  if(p.r>0.10) w.push(['Un rendement supérieur à 10 % par an est très ambitieux. Ne le présentez jamais comme une promesse.','info']);
+  $('warns').innerHTML = w.map(x=>`<div class="warn ${x[1]||''}" role="alert">${x[0]}</div>`).join('');
+
+  // Critères
+  $('crit').innerHTML = k.crit.map(x=>{
+    const pct = x.s===null?0:Math.round(x.s*100);
+    const col = x.s===null?'#c3cbd9':x.s>=0.75?'#16784d':x.s>=0.45?'#c47a0c':'#b42318';
+    return `<div><div class="cr-h"><span>${x.name}</span><span class="pts">${x.s===null?'non calculé':Math.round(x.w*x.s)+' / '+x.w}</span></div><div class="cr-q">${x.q}</div><div class="meter" role="img" aria-label="${x.name} : ${pct} %"><i style="width:${pct}%;background:${col}"></i></div></div>`;
+  }).join('');
+  const att = k.crit.filter(x=>x.s!==null && x.s<0.7).sort((a,b)=>b.w*(1-b.s)-a.w*(1-a.s)).slice(0,4);
+  $('attn').innerHTML = att.length
+    ? '<ul class="attn">'+att.map(x=>`<li><span class="ico">!</span><div><b>${x.name}</b><p>${x.info}</p><p class="adv">→ ${x.tip}</p></div></li>`).join('')+'</ul>'
+    : '<div class="okbox">✓ Aucun point critique détecté avec ces hypothèses. Restez prudent et vérifiez le cadre juridique.</div>';
+
+  // KPI
+  $('kReceived').textContent = fmt(sim.totalReceived);
+  $('kReceivedSub').textContent = 'sur '+fmt(sim.totalExpected)+' prévus';
+  $('kFinal').textContent = fmt(sim.final);
+  $('kGain').textContent = fmtS(sim.gain);
+  $('kGain').className = 'num '+(sim.gain>=0?'good':'bad');
+  $('kGainSub').textContent = sim.totalReceived>0 ? pf(sim.gain/sim.totalReceived*100)+' des cotisations encaissées' : '';
+  $('kIrr').textContent = irrV===null ? 'n.d.' : pf(irrV*100);
+  $('kPer').textContent = fmt(sim.final/p.members);
+  $('kPerSub').textContent = 'Mise par membre : '+fmt(p.contribution*p.months);
+  $('kFees').textContent = fmt(sim.totalFees);
+  $('kFeesSub').textContent = sim.totalReceived>0 ? pf(k.F*100)+' des cotisations encaissées' : '';
+
+  // Flux
+  const adj = sim.final - (sim.totalReceived - p.setup - sim.opsTotal - sim.fees + sim.growth);
+  const rows = [
+    ['Cotisations prévues par le groupe', fmt(sim.totalExpected), ''],
+    ['Impayés estimés', '−'+fmt(sim.totalExpected-sim.totalReceived), 'bad'],
+    ['Cotisations encaissées', fmt(sim.totalReceived), 'tot'],
+    ['Frais fixes de départ', '−'+fmt(p.setup), 'bad'],
+    ['Frais de fonctionnement', '−'+fmt(sim.opsTotal), 'bad'],
+    ['Frais de gestion des placements', '−'+fmt(sim.fees), 'bad'],
+    ['Rendement des placements', fmtS(sim.growth), sim.growth>=0?'good':'bad']
+  ];
+  if(Math.abs(adj)>1) rows.push(['Ajustement (frais supérieurs aux cotisations)', fmtS(adj), '']);
+  rows.push(['Valeur finale estimée', fmt(sim.final), 'tot']);
+  $('flow').innerHTML = rows.map(r=>`<tr class="${r[2]==='tot'?'tot':''}"><td>${r[0]}</td><td class="${r[2]==='tot'?'':r[2]}">${r[1]}</td></tr>`).join('');
+  $('flowNote').textContent = 'Dont réserve de sécurité non investie : '+fmt(sim.resTotal)+'.';
+
+  // Scénarios
+  const sc = [['Choc sévère',-0.15],['Prudent',-0.05],['Central',0.05],['Favorable',0.10]];
+  let h = sc.map(s=>{
+    const z = simulate(p,s.length?s[1]:0);
+    return `<tr><td>${s[0]}</td><td>${pf(s[1]*100)}</td><td>${fmt(z.final)}</td><td class="${z.gain>=0?'good':'bad'}">${fmtS(z.gain)}</td><td>${z.totalReceived>0?pf(z.final/z.totalReceived*100):'–'}</td></tr>`;
+  }).join('');
+  h += `<tr class="me"><td><b>Votre scénario</b></td><td>${pf(p.r*100)}</td><td>${fmt(sim.final)}</td><td class="${sim.gain>=0?'good':'bad'}">${fmtS(sim.gain)}</td><td>${sim.totalReceived>0?pf(sim.final/sim.totalReceived*100):'–'}</td></tr>`;
+  $('scen').innerHTML = h;
+
+  drawChart(sim,pru,p.months);
+  last = {p,sim,k,lv,irrV};
+  updateNav();
+}
+
+/* Graphique SVG avec lecture au survol */
+function drawChart(sim,pru,months){
+  const W=640,H=270,Lm=58,Rm=14,Tm=14,Bm=32;
+  const max = Math.max(...sim.val,...pru.val,...sim.cum,1)*1.06;
+  const x = m => Lm+(W-Lm-Rm)*m/months;
+  const y = v => Tm+(H-Tm-Bm)*(1-v/max);
+  const path = a => a.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+  let g='';
+  for(let i=0;i<=4;i++){ const v=max*i/4; g+=`<line class="grid" x1="${Lm}" x2="${W-Rm}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/><text class="ax" x="${Lm-8}" y="${(y(v)+4).toFixed(1)}" text-anchor="end">${short(v)}</text>`; }
+  [0,.25,.5,.75,1].forEach(t=>{ const m=Math.round(months*t); g+=`<text class="ax" x="${x(m).toFixed(1)}" y="${H-10}" text-anchor="middle">${m===0?'Début':m+' m'}</text>`; });
+  const area = path(sim.val)+` L ${x(months).toFixed(1)} ${y(0).toFixed(1)} L ${x(0).toFixed(1)} ${y(0).toFixed(1)} Z`;
+  $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution du capital estimé mois par mois">
+    <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2457a6" stop-opacity=".22"/><stop offset="1" stop-color="#2457a6" stop-opacity="0"/></linearGradient></defs>
+    ${g}
+    <path d="${area}" fill="url(#ga)"/>
+    <path d="${path(sim.cum)}" fill="none" stroke="#8a96ab" stroke-width="2" stroke-dasharray="5 4"/>
+    <path d="${path(pru.val)}" fill="none" stroke="#c47a0c" stroke-width="2.2"/>
+    <path d="${path(sim.val)}" fill="none" stroke="#2457a6" stroke-width="3"/>
+    <line id="cur" x1="0" x2="0" y1="${Tm}" y2="${H-Bm}" stroke="#14243b" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>
+    <circle id="dot" r="5" fill="#2457a6" stroke="#fff" stroke-width="2" visibility="hidden"/>
+    <rect id="hit" x="${Lm}" y="${Tm}" width="${W-Lm-Rm}" height="${H-Tm-Bm}" fill="transparent"/>
+  </svg>`;
+  $('chartRead').textContent = 'Survolez ou touchez le graphique pour lire les montants mois par mois.';
+  const svg = $('chart').querySelector('svg'), hit = $('hit'), cur = $('cur'), dot = $('dot');
+  const move = ev => {
+    const pt = ev.touches ? ev.touches[0] : ev;
+    const r = svg.getBoundingClientRect();
+    const px = (pt.clientX-r.left)/r.width*W;
+    const m = clamp(Math.round((px-Lm)/(W-Lm-Rm)*months),0,months);
+    cur.setAttribute('x1',x(m)); cur.setAttribute('x2',x(m)); cur.setAttribute('visibility','visible');
+    dot.setAttribute('cx',x(m)); dot.setAttribute('cy',y(sim.val[m])); dot.setAttribute('visibility','visible');
+    $('chartRead').innerHTML = `<b>Mois ${m}</b> · Cotisations : ${fmt(sim.cum[m])} · Votre scénario : <b>${fmt(sim.val[m])}</b> · Prudent : ${fmt(pru.val[m])}`;
+  };
+  hit.addEventListener('pointermove',move);
+  hit.addEventListener('pointerdown',move);
+}
+
+/* Résumé à copier */
+function summaryText(){
+  if(!last) return '';
+  const {p,sim,k,lv,irrV} = last;
+  return [
+    "TONTINE D'INVESTISSEMENT KONDO — Résumé de simulation",
+    `Indice KONDO : ${k.index}/100 (${lv.name})`+(k.capped?` — plafonné, il manque : ${k.missCrit.join(', ')}`:''),
+    `${p.members} membres · ${fmt(p.contribution)}/mois · ${monthsLabel(p.months)}`,
+    `Rendement supposé : ${pf(p.r*100)}/an · frais de gestion : ${pf(p.fee*100)}/an · réserve : ${pf(p.reserve*100)} · impayés : ${pf(p.def*100)}`,
+    `Cotisations encaissées : ${fmt(sim.totalReceived)}`,
+    `Valeur finale estimée : ${fmt(sim.final)} (${fmtS(sim.gain)})`,
+    `Rendement net annualisé : ${irrV===null?'n.d.':pf(irrV*100)}`,
+    "Simulation pédagogique, non garantie. Voir les avertissements juridiques de l'outil."
+  ].join('\n');
+}
+
+/* Événements */
+NUM_IDS.forEach(id=>$(id).addEventListener('input',render));
+CHK_IDS.forEach(id=>$(id).addEventListener('change',render));
+document.querySelectorAll('.pre').forEach(b=>b.addEventListener('click',()=>{
+  const pr = PRESETS[b.dataset.p];
+  Object.keys(pr).forEach(k=>$(k).value = pr[k]);
+  render();
+}));
+$('reset').addEventListener('click',()=>{
+  NUM_IDS.forEach(id=>$(id).value = id==='months' ? 6 : 0);
+  CHK_IDS.forEach(id=>$(id).checked = false);
+  render();
+  go(1);
+});
+$('print').addEventListener('click',()=>window.print());
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===t));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('on',x.id===t.dataset.t));
+  if(window.innerWidth<=960){ const r=$('resultats'); if(r&&r.scrollIntoView) r.scrollIntoView({block:'start'}); }
+}));
+$('copy').addEventListener('click',()=>{
+  const t = summaryText(), btn = $('copy');
+  const done = () => { const o = btn.textContent; btn.textContent = 'Copié ✓'; setTimeout(()=>btn.textContent='Copier le résumé',1800); };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done,()=>{}); }
+  else { const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');done();}catch(e){} ta.remove(); }
+});
+/* Parcours pas à pas */
+let step = 1;
+function valid1(){ return num('members',0)>=2 && num('contribution',0)>0; }
+function updateNav(){
+  const ok = valid1();
+  $('next1').disabled = !ok;
+  $('hint1').hidden = ok;
+}
+function go(n){
+  if(n>1 && !valid1()) n = 1;
+  step = n;
+  document.querySelectorAll('.step').forEach(x=>x.classList.toggle('on',+x.dataset.s===n));
+  document.querySelectorAll('#prog button').forEach(b=>{
+    const v = +b.dataset.s;
+    b.classList.toggle('on',v===n); b.classList.toggle('done',v<n);
+    b.setAttribute('aria-current', v===n ? 'step' : 'false');
+  });
+  $('wiz').hidden = n===4;
+  $('resultats').hidden = n!==4;
+  if(window.scrollTo) window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.go)));
+document.querySelectorAll('#prog button').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.s)));
+render();
+go(1);
+</script>
+</body>
+</html>
